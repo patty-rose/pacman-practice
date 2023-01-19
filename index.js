@@ -22,10 +22,10 @@ class Boundary {
 }
 
 class Player {
-  constructor() {
+  constructor({ position, velocity }) {
     this.position = position;
     this.velocity = velocity;
-    this.radius = 10;
+    this.radius = 15;
   }
 
   draw() {
@@ -35,7 +35,46 @@ class Player {
     c.fill();
     c.closePath();
   }
+
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x; //updates left/right location by 1 increment of velocity unit
+    this.position.y += this.velocity.y; ////updates up/down location by 1 increment of velocity unit
+  }
 }
+
+function createImage(src) {
+  const image = new Image();
+  image.src = src;
+  return image;
+}
+
+const boundaries = [];
+const player = new Player({
+  position: {
+    x: Boundary.width + Boundary.width / 2,
+    y: Boundary.height + Boundary.height / 2,
+  },
+  velocity: {
+    x: 0,
+    y: 0,
+  },
+});
+
+const keys = {
+  w: {
+    pressed: false,
+  },
+  a: {
+    pressed: false,
+  },
+  s: {
+    pressed: false,
+  },
+  d: {
+    pressed: false,
+  },
+};
 
 const map = [
   ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
@@ -52,14 +91,6 @@ const map = [
   ["|", ".", ".", ".", ".", ".", ".", ".", ".", "p", "|"],
   ["4", "-", "-", "-", "-", "-", "-", "-", "-", "-", "3"],
 ];
-
-function createImage(src) {
-  const image = new Image();
-  image.src = src;
-  return image;
-}
-
-const boundaries = [];
 
 map.forEach((row, i) => {
   row.forEach((symbol, j) => {
@@ -257,6 +288,60 @@ map.forEach((row, i) => {
   });
 });
 
-boundaries.forEach((boundary) => {
-  boundary.draw();
+function animate() {
+  window.requestAnimationFrame(animate);
+  c.clearRect(0, 0, canvas.width, canvas.height);
+  boundaries.forEach((boundary) => {
+    boundary.draw();
+  });
+
+  player.update();
+  player.velocity.y = 0
+  player.velocity.x = 0
+
+  if (keys.w.pressed) {
+    player.velocity.y = -5;
+  } else if (keys.a.pressed) {
+    player.velocity.x = -5;
+  } else if (keys.s.pressed) {
+    player.velocity.y = 5;
+  } else if (keys.d.pressed) {
+    player.velocity.x = 5;
+  }
+}
+
+animate();
+
+window.addEventListener("keydown", ({ key }) => {
+  switch (key) {
+    case "w":
+      keys.w.pressed = true;
+      break;
+    case "a":
+      keys.a.pressed = true;
+      break;
+    case "s":
+      keys.s.pressed = true;
+      break;
+    case "d":
+      keys.d.pressed = true;
+      break;
+  }
 });
+
+window.addEventListener("keyup", ({ key }) => {
+  switch (key) {
+    case "w":
+      keys.w.pressed = false;
+      break;
+    case "a":
+      keys.a.pressed = false;
+      break;
+    case "s":
+      keys.s.pressed = false;
+      break;
+    case "d":
+      keys.d.pressed = false;
+      break;
+  }
+}); //makes player movement STOP when key stops being pressed
