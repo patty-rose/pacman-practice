@@ -312,7 +312,6 @@ function animate() {
       const boundary = boundaries[i];
       if (
         circleCollidesWithRectangle({
-          //are we colliding with any rectangles in the next frame if we move left.. or press 'w'
           circle: {
             ...player,
             velocity: {
@@ -321,7 +320,7 @@ function animate() {
             },
           },
           rectangle: boundary,
-        })
+        })//are we colliding with any rectangles in the next frame if we move left.. or press 'w'
       ) {
         player.velocity.y = 0; //if collision is detected-- stop player movement
         break;
