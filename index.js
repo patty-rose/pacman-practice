@@ -76,6 +76,8 @@ const keys = {
   },
 };
 
+let lastKey = "";
+
 const map = [
   ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
   ["|", ".", ".", ".", ".", ".", ".", ".", ".", ".", "|"],
@@ -288,26 +290,127 @@ map.forEach((row, i) => {
   });
 });
 
+function circleCollidesWithRectangle({ circle, rectangle }) {
+  return (
+    circle.position.y - circle.radius + circle.velocity.y <=
+      rectangle.position.y + rectangle.height &&
+    circle.position.x + circle.radius + circle.velocity.x >=
+      rectangle.position.x &&
+    circle.position.y + circle.radius + circle.velocity.y >=
+      rectangle.position.y &&
+    circle.position.x - circle.radius + circle.velocity.x <=
+      rectangle.position.x + rectangle.width
+  );
+}
+
 function animate() {
   window.requestAnimationFrame(animate);
   c.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (keys.w.pressed && lastKey === "w") {
+    for (let i = 0; i < boundaries.length; i++) {
+      const boundary = boundaries[i];
+      if (
+        circleCollidesWithRectangle({
+          //are we colliding with any rectangles in the next frame if we move left.. or press 'w'
+          circle: {
+            ...player,
+            velocity: {
+              x: 0,
+              y: -5,
+            },
+          },
+          rectangle: boundary,
+        })
+      ) {
+        player.velocity.y = 0; //if collision is detected-- stop player movement
+        break;
+      } else {
+        player.velocity.y = -5; //if not colliding, move player up
+      }
+    }
+  } else if (keys.a.pressed && lastKey === "a") {
+    for (let i = 0; i < boundaries.length; i++) {
+      const boundary = boundaries[i];
+      if (
+        circleCollidesWithRectangle({
+          circle: {
+            ...player,
+            velocity: {
+              x: -5,
+              y: 0,
+            },
+          },
+          rectangle: boundary,
+        })
+      ) {
+        player.velocity.x = 0;
+        break;
+      } else {
+        player.velocity.x = -5;
+      }
+    }
+  } else if (keys.s.pressed && lastKey === "s") {
+    for (let i = 0; i < boundaries.length; i++) {
+      const boundary = boundaries[i];
+      if (
+        circleCollidesWithRectangle({
+          circle: {
+            ...player,
+            velocity: {
+              x: 0,
+              y: 5,
+            },
+          },
+          rectangle: boundary,
+        })
+      ) {
+        player.velocity.y = 0;
+        break;
+      } else {
+        player.velocity.y = 5;
+      }
+    }
+  } else if (keys.d.pressed && lastKey === "d") {
+    for (let i = 0; i < boundaries.length; i++) {
+      const boundary = boundaries[i];
+      if (
+        circleCollidesWithRectangle({
+          circle: {
+            ...player,
+            velocity: {
+              x: 5,
+              y: 0,
+            },
+          },
+          rectangle: boundary,
+        })
+      ) {
+        player.velocity.x = 0;
+        break;
+      } else {
+        player.velocity.x = 5;
+      }
+    }
+  }
+
   boundaries.forEach((boundary) => {
     boundary.draw();
+
+    if (
+      circleCollidesWithRectangle({
+        circle: player,
+        rectangle: boundary,
+      })
+    ) {
+      //collision detection
+      console.log("choque!");
+      player.velocity.y = 0;
+      player.velocity.x = 0;
+    }
   });
 
   player.update();
-  player.velocity.y = 0
-  player.velocity.x = 0
-
-  if (keys.w.pressed) {
-    player.velocity.y = -5;
-  } else if (keys.a.pressed) {
-    player.velocity.x = -5;
-  } else if (keys.s.pressed) {
-    player.velocity.y = 5;
-  } else if (keys.d.pressed) {
-    player.velocity.x = 5;
-  }
 }
 
 animate();
@@ -316,18 +419,22 @@ window.addEventListener("keydown", ({ key }) => {
   switch (key) {
     case "w":
       keys.w.pressed = true;
+      lastKey = "w";
       break;
     case "a":
       keys.a.pressed = true;
+      lastKey = "a";
       break;
     case "s":
       keys.s.pressed = true;
+      lastKey = "s";
       break;
     case "d":
       keys.d.pressed = true;
+      lastKey = "d";
       break;
   }
-});
+}); //makes player movement start
 
 window.addEventListener("keyup", ({ key }) => {
   switch (key) {
